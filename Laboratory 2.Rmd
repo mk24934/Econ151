@@ -1,0 +1,355 @@
+---
+title: "Laboratory 2"
+author: "Written by Mark McAvoy"
+date: "Summer 2020"
+knit: (function(inputFile, encoding) { 
+      out_dir <- 'Knit files (Output)';
+      rmarkdown::render(inputFile,
+                    encoding=encoding, 
+                    output_file=file.path(dirname(inputFile), out_dir, 'Laboratory 2.html')) })
+output:
+  revealjs::revealjs_presentation:
+    theme: beige
+    highlight: pygments
+    center: true
+    css: styles.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Clear enviroment before starting 
+remove(list = ls())
+
+
+# The following sets your working directory to wherever this .Rmd file is saved
+# note, must be included in the setup portion of the .Rmd
+knitr::opts_knit$set(root.dir = getwd())
+library(kableExtra)
+options(knitr.table.format = "html")
+# Note: this only runs when knit, so if try running by hand it will not do anything, best to also change working directory manually
+# alternatively, you may change working directory manually
+
+# if(!require(revealjs)) install.packages("revealjs", repos = "http://cran.us.r-project.org") # for revealjs slides
+# library(revealjs) 
+if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org") # run this the first time (only need to once), note moved tidyverse to after AER package, as it was creating some issues running AER after tidyverse
+  library(tidyverse) # includes ggplot2 and many more useful libraries
+library(reshape2)
+library(magrittr)
+# if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.org")
+#   library(knitr) # knitr is used to render this R code to a LaTeX file (includes kable)
+# if(!require(stargazer)) install.packages("stargazer", repos = "http://cran.us.r-project.org")
+#   library(stargazer) # knitr is used to render this R code to a LaTeX file (includes kable)
+```
+
+### <span style="color:forestgreen"> --- Principles of Economics --- </span>
+
+#### <span style="color:forestgreen"> --- Chapter 20 - Economic Growth --- </span>
+
+```{r, echo = FALSE}
+# read in data
+df <- read.csv("Input/Lab2-data.csv")
+
+c = 1000000 # put in millions of dollars
+# create a new variable: GDP growth rate
+df <- df %>% mutate(USA = GDP_USA/c,
+                    GBR = GDP_GBR/c,
+                    AUS = GDP_AUS/c,
+                    CHL = GDP_CHL/c,
+                    IDN = GDP_IDN/c)
+```
+
+In section 20.1 The Relatively Recent Arrival of Economic Growth we learn that economic growth is a relatively recent phenomena. It is hard to obtain data for GDP in long ago times, thankfully however there are some economic historians that try and determine these such as Angus Maddison. 
+
+In today's exercise we will look at GDP in the relatively recent history.
+
+## <span style="color:forestgreen"> --- The Industrial Revolusions --- </span>
+
+Here we see GDP from 1820 - 1950 for The US, Britain, Australia, Chile, and Indonesia.
+
+The Industrial Revolution is thought to have begin in 1760 in England and lasting until around 1830. As we learn in the reading this surge in economic growth, coupled with socioeconomic and cultural changes were due from several key developments that set England apart from other places in the world and is why the industrial revolution started here. These key developments are:
+
+- The Rule of Law
+
+- The Steam Engine
+
+## <span style="color:forestgreen"> --- The Rule of Law --- </span> 
+
+Protection of property rights and contractual rights by a country’s government allowed entrepenours to develop their ideas without it being stolen and given them the emphasis to put hard work in to develop these so they may be rewarded based on the quality of their invention
+
+
+## <span style="color:forestgreen"> --- The Steam Engine --- </span> 
+
+One of these such inventions revolutionized how we work, the steam engine was first invented in 1712 by Thomas Newcomen in England, however it was hopelessly inefficient, it was improved upon by James Watt from 1763 - 1775. This improved version could do the work of tens to hundreds of men and horses thus allowing production of advanced machinery that could make use of this tremendous energy such as locomotives, ships, factories, and automobiles.
+
+## <span style="color:forestgreen"> --- GDP as a measure of a Country's development --- </span> 
+
+Up until the 21st century economic growth often went hand in hand with other measures of development for a country, such as education, healthcare, environmental sustainability, etc. The farthest back consistent data we have for a few countries is 1820, so let's look at GDP from 1820 - 1950.
+
+This is what lead to GDP in 1820 for Britian to be far ahead of the rest: America, Australia, Chile and Indonesia
+
+```{r, echo = FALSE, message = FALSE}
+kable(head(round(df %>% select(GBR, USA, AUS, CHL, IDN),2), 1), caption = "Table 1: GDP in Millions of US Dollars")
+```
+
+## <span style="color:forestgreen"> --- The Second Industrial Revolution  --- </span> 
+
+The First Industrial Revolution (in England) led to the Second Industrial Revolution (In America). Further innovations in steel production, petroleum and electricity led to the introduction of public automobiles and airplanes from 1870 - 1914. 
+
+---
+
+We see this revolution which occured in America led them to grow their economy much more than the rest of the world <font size = "-0.5"> (Very likely the picture is the same from 1760 - 1830 replacing America and England for the first revolution, however we do not have that data) </font>
+
+```{r, echo = FALSE, fig.height = 5, fig.fullwidth=TRUE}
+library(ggpubr)
+# theme_set(theme_pubr())
+
+df_1820_1950 <- df %>% filter(Date >= 1821 & Date <= 1950) %>% select(Date, USA, GBR, AUS, CHL, IDN)
+
+df_melt <- melt(df_1820_1950, id.vars = "Date",
+                    measure.vars = c("USA", "GBR", "AUS", "CHL", "IDN"), 
+                    variable.name = "Countries",
+                    value.name = "Y")
+     
+plot1 <- ggplot(df_melt, aes(x = Date, y = Y, color = Countries)) + 
+  geom_line(size = 1) +
+  # geom_vline(xintercept=c(25,30), linetype="dotted") +
+  scale_color_manual(breaks = c("USA", "GBR", "AUS", "CHL", "IDN"),
+                    values=c("blue", "forestgreen", "red", "orange", "darkgrey")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("GDP (in Millions of USD)") +
+  xlab("Date") +
+  ggtitle("Figure 1: GDP for select countries from 1820-1950")
+plot1
+```
+
+## <span style="color:forestgreen"> --- Growth rates 1 --- </span> 
+
+Let's examine the development of this graph, what led to the blue line being far above the rest at the end of the figure? Let's look at growth rates.
+
+A growth rate is how much a numerical value increases (or decreases) over time, it has two identical definitions. Let $Y_t$ be a numerical variable (such as GDP) at time $t$, the the growth rate of Y (Denoted $GY_t$ is given by:
+
+$$ GY_{t} = \frac{Y_t - Y_{t-1}}{Y_{t-1}}  $$
+
+## <span style="color:forestgreen"> --- Growth rates 2  --- </span> 
+
+An alternative formulation is given as
+
+$$ GY_t = ln(Y_t) - ln(Y_{t-1}) $$
+
+Why is this? Notice that when $Y_t$ and $Y_{t-1}$ are close to each other (ie when $\frac{Y_t}{Y_{t-1}} \approx 1)$):
+
+$$ ln(Y_t) - ln(Y_{t-1}) = ln \left( \frac{Y_t}{Y_{t-1}} \right) \approx  \frac{Y_t}{Y_{t-1}} - 1 $$
+
+---
+
+Where the approximately equal to follows from the taylor series expansion of $log(X)$ around $X = 1$,
+
+$$ ln(X) \approx log(1) + \frac{d}{dX} log(X) \bigg|_{X=1} (X - 1) $$
+
+$$= 0 + \frac{1}{X} \bigg|_{X=1} (X - 1) $$
+
+$$ = \frac{1}{1} (X - 1) = X - 1  $$
+
+<font size = "-0.5"> Note: we will use $log = ln$ interchangeably </font>
+
+## <span style="color:forestgreen"> --- Plotting Growth Rates  --- </span>
+
+We construct the growth rates of our 5 counties, 
+
+however these appear random and we cannot make any trend out of this. 
+
+```{r, echo = FALSE, fig.height = 4, fig.fullwidth=TRUE}
+lagit4me <- function(serie,lag){
+              n = length(serie);
+              pad = rep(NA,lag);
+              return(c(pad,serie)[1:n]);
+            }
+
+df2 <- df %>% mutate(GBR = 100*(log(GDP_GBR) - log(lagit4me(GDP_GBR,1))), 
+                      USA = 100*(log(GDP_USA) - log(lagit4me(GDP_USA,1))), 
+                      AUS = 100*(log(GDP_AUS) - log(lagit4me(GDP_AUS,1))), 
+                      CHL = 100*(log(GDP_CHL) - log(lagit4me(GDP_CHL,1))),
+                      IDN = 100*(log(GDP_IDN) - log(lagit4me(GDP_IDN,1))))
+
+df2_1820_1950 <- df2 %>% filter(Date >= 1821 & Date <= 1950) %>% select(Date, USA, GBR, AUS, CHL, IDN)
+
+df2_melt <- melt(df2_1820_1950, id.vars = "Date",
+                    measure.vars = c("USA", "GBR", "AUS", "CHL", "IDN"), 
+                    variable.name = "Countries",
+                    value.name = "Growth_Rates")
+
+plot2 <- ggplot(df2_melt, aes(x = Date, y = Growth_Rates, color = Countries)) + 
+  geom_line(size = 1) +
+  # geom_vline(xintercept=c(25,30), linetype="dotted") +
+  scale_color_manual(breaks = c("USA", "GBR", "AUS", "CHL", "IDN"),
+                    values=c("blue", "forestgreen", "red", "orange", "darkgrey")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Growth Rate") +
+  xlab("Date") +
+  ggtitle("Figure 2: Growth Rates of GDP from 1820-1950")
+plot2
+```
+
+---
+
+We can however look at the first moment (the mean) and notice that the mean of AUS and USA are higher than the others, and all are positive, indicating that while there were many ups and downs, on average GDP growth was increasing
+
+```{r, echo = FALSE}
+library(naniar)
+means <- df2 %>% select("USA", "GBR", "AUS", "CHL", "IDN") %>% 
+  replace_with_na(replace = list(IDN = c(-Inf, Inf, "NaN"))) %>% 
+  summarise_all(mean, na.rm = TRUE)
+
+kable(means, caption = "Table 2: Average Growth Rates from 1820 - 1950")
+```
+
+## <span style="color:forestgreen"> --- The power of sustained growth  --- </span>
+
+In section 20.2 we see an example that if a country grows at a constant rate of 3% per year then after 25 years the GDP will have a little more than doubled. This is given by the compound growth equation:
+
+$$ Y_t (1 + GY)^{25} = Y_{t+25} $$
+
+## <span style="color:orchid"> +++ Laboratory assignment A +++ </span>
+
+1. What is $log(1)$ equal to?
+2. What is $log(2.1/2)$ equal to?
+3. What is $\frac{2.1 - 2}{2}$ equal to?
+4. How much differnt are the answers to A2 and A3?
+5. Starting at GDP = 100, what is GDP 30 years later? Presume a contant 3% growth rate every year.
+
+## <span style="color:forestgreen"> --- Another reason to use Logarithms  --- </span>
+
+Another reason to use logarithms in economics is that if we plot (Date, GDP) we see a one year increase in Date leads to a Unit value change in GDP, whereas if we plot (Date, 100*log(GDP)) a one year increase Date leads to a Percent change in GDP. To see this, let's look at table 1 with two values now.
+
+```{r, echo = FALSE, message = FALSE}
+# use of logarithms: https://econbrowser.com/archives/2014/02/use-of-logarithms-in-economics
+kable(head(round(df %>% select(GBR, USA, AUS, CHL, IDN),2), 2), caption = "Table 2: GDP for 1820 and 1821")
+```
+---
+
+Notice that GBR increased from 68.84 to 69.89, this is a $(69.89 - 68.84)/68.84 = 0.01525$ or $log(69.89) - log(68.84) = 0.01513$ percent change (notice again how close these two are in value)
+
+If we subtract the initial 1820 value from all subsequent values take logarithsm and multiply by 100 we obtain percent changes of future values with respect to 1820. 
+
+## <span style="color:forestgreen"> --- Plotting 100*log(GDP)  --- </span>
+
+We see a different picture with this transformation, Australia has seen the most growth over this period, second Chile, third America, fourth Britian, and lastly Indonesia. 
+
+```{r, echo = FALSE, fig.height = 4, fig.fullwidth=TRUE}
+df3 <- df %>% mutate(GBR = 100*(log(GDP_GBR) - log(GDP_GBR)[1]), 
+                      USA = 100*(log(GDP_USA) - log(GDP_USA)[1]), 
+                      AUS = 100*(log(GDP_AUS) - log(GDP_AUS)[1]), 
+                      CHL = 100*(log(GDP_CHL) - log(GDP_CHL)[1]), 
+                      IDN = 100*(log(GDP_IDN) - log(GDP_IDN)[1]))
+
+df3_1820_1950 <- df3 %>% filter(Date >= 1821 & Date <= 1950) %>% select(Date, USA, GBR, AUS, CHL, IDN)
+
+df3_melt <- melt(df3_1820_1950, id.vars = "Date",
+                    measure.vars = c("USA", "GBR", "AUS", "CHL", "IDN"), 
+                    variable.name = "Countries",
+                    value.name = "Growth_Rates")
+
+plot3 <- ggplot(df3_melt, aes(x = Date, y = Growth_Rates, color = Countries)) + 
+  geom_line(size = 1) +
+  # geom_vline(xintercept=c(25,30), linetype="dotted") +
+  scale_color_manual(breaks = c("USA", "GBR", "AUS", "CHL", "IDN"),
+                    values=c("blue", "forestgreen", "red", "orange", "darkgrey")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("100 * log(GDP)") +
+  xlab("Date") +
+  ggtitle("Figure 3: GDP Growth from 1820-1950")
+plot3
+```
+
+## <span style="color:forestgreen"> --- Components of Economic Growth  --- </span>
+
+In Section 20.3 we read about components of economic growth such as
+
+- Physical capital: things like roads, equipment, industrial plants
+- Technology: inventions or innovations that increase labour productivity
+
+Growth in these two items (among many others) leads to growth in an economy, which in turn allows its people to live a higher quality of life
+
+## <span style="color:forestgreen"> --- Mesaures of Development --- </span>
+
+As mentioned at the beginning of the laboratory, up until the 21st century economic growth often went hand in hand with other measures of development for a country, such as education, healthcare, environmental sustainability, etc. This is not totally the case any more where we see countries such as the US with higher GDP and GDP per capita than Germany but where workers in the US work longer hours, and take fewer vacations. 
+
+## <span style="color:forestgreene"> --- Mesaures of Development --- </span>
+
+Other measaures of development may be seen in several of the United Nations Development Programme Millennium Development Goals:
+
+- Education levels
+- Gender Equality
+- Child Mortality 
+- Healthcare and ability to combat diseases
+- Environmental Sustainability
+- Quality of Life
+
+## <span style="color:forestgreen"> --- Education --- </span>
+
+It is natural to extrapolate that more education for people in a society makes them more productive workers, which will lead to growth. 
+
+This is especially the case for education for girls in low-income countries, where additional years of schooling: reduces the number of children, lowers the chance of death in childbirth, and increases education for her children
+
+## <span style="color:forestgreen"> --- Economic Convergence  --- </span>
+
+While there is a clear difference in economic levels between countries today, there is hope that sharing of technology may lead to faster growth in low-income countries. 
+
+Recall Figure 1, Figure 3, and Table 1 and Table 2. In figure 1 we saw the US pulled away from other others with their high growth rate. However when we looked at figure 3 we saw that Australia actually had a higher growth rate. This is confirmed by the average growth rates in Table 2. If Australia were to continue growing at the higher rate then they would someday catch-up to America. Indeed GDP per capita in 2017 in America was \$59,500 and \$53,800 in Australia!
+
+## <span style="color:forestgreen"> +++ Laboratory assignment B +++ </span>
+
+1. How did the Industrial Revolution increase the rate of economic growth and income levels in England?
+2. Section 20.2 outlined the logic of how increased productivity is associated with increased wages. Detail a situation where this is not the case and explain why it is not.
+3. What do economists mean when they refer to improvements in technology?
+4. List some arguments for and against the likelihood of economic convergence.
+
+---
+
+### <span style="color:deepskyblue"> --- Reproducible Research with R  --- </span>
+
+#### <span style="color:deepskyblue"> --- Section 3.2 - Using RStudio  --- </span>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/KFvQp3sw9mY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## <span style="color:deepskyblue"> --- Section 3.3 - Using *knitr* and *rmarkdown*: The Basics  --- </span>
+
+## <span style="color:deepskyblue"> --- Section 3.3.1 - What *knitr* and *rmarkdown* do  --- </span>
+
+Knitr and rmarkdown is a series of compilers that transforms R code to html code. Technically rmarkdown uses knitr as an intermediary step, however we simply call the process of converting our .Rmd file to .html as *knitting*. This is useful for presentations as we can make nice looking text, and tables using html, coupled with nice looking graphics we can make in R with the ggplot2 package entails very nice documents or presentations.
+
+---
+
+
+## <span style="color:deepskyblue"> --- Let's learn about .Rmd files  --- </span>
+
+- Click: Create new file button in the toolbar in RStudio (it looks like a white page with a green +)
+- Click: R Markdown...
+- Some options appear, don't change anything, leave as is, and click OK
+- A new document in the top left window of RStudio should open titled, "Untitled1"
+
+## <span style="color:deepskyblue"> --- Let's learn about .Rmd files  --- </span>
+
+- The text inbetween the set of \-\-\- creates the header page (as well as defining what the output document will be)
+- inside the \`\`\`{r}  and \`\`\` will run r-code as if it were in an .R file
+- text outisde this is compiled in LaTeX, which we will learn later
+- Click: knit - this compiles the code and produces an an html document
+  - Note: you will need to name it, name it whatever you would like
+
+## <span style="color:deepskyblue"> --- Let's learn about .Rmd files  --- </span>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/O6yA22tFVvo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## <span style="color:orchid"> +++ Laboratory assignment C +++ </span>
+
+1. Create an .Rmd file using the method in the video
+2. Give it a title, "Laboratory assignment 2 - *name*" 
+3. Remove the text that is automatically generated
+4. Add the R-code and text that answers the previous questions in this Laboratory (Part A and B)
+    - \hspace{14pt}Note: Text should be written outside the \`\`\`{r}  ... \`\`\` while code should be written inside
+5. Knit the file, you should see all the results printed out in an html document
+6. Upload both the .Rmd file to Latte

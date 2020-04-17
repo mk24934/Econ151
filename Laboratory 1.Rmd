@@ -1,0 +1,273 @@
+---
+title: "Laboratory 1"
+author: "Written by Mark McAvoy"
+date: "Summer 2020"
+knit: (function(inputFile, encoding) { 
+  out_dir <- 'Knit files (Output)';
+  rmarkdown::render(inputFile,
+                    encoding=encoding, 
+                    output_file=file.path(dirname(inputFile), out_dir, 'Laboratory 1.html')) })
+output:
+  revealjs::revealjs_presentation:
+    theme: beige
+    highlight: pygments
+    center: true
+    css: styles.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Clear enviroment before starting 
+remove(list = ls())
+
+
+# The following sets your working directory to wherever this .Rmd file is saved
+# note, must be included in the setup portion of the .Rmd
+knitr::opts_knit$set(root.dir = getwd())
+library(knitr)
+library(kableExtra)
+options(knitr.table.format = "html")
+# Note: this only runs when knit, so if try running by hand it will not do anything, best to also change working directory manually
+# alternatively, you may change working directory manually
+
+
+# if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org") # run this the first time (only need to once), note moved tidyverse to after AER package, as it was creating some issues running AER after tidyverse
+#   library(tidyverse) # includes ggplot2 and many more useful libraries
+# if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.org")
+#   library(knitr) # knitr is used to render this R code to a LaTeX file (includes kable)
+# if(!require(stargazer)) install.packages("stargazer", repos = "http://cran.us.r-project.org")
+#   library(stargazer) # knitr is used to render this R code to a LaTeX file (includes kable)
+# if(!require(printr)) install.packages("printr", repos = "http://cran.us.r-project.org")
+# library(printr)
+```
+
+### <span style="color:deepskyblue; font-family: Times-New-Roman, Times, serif"> --- Reproducible Research with R  --- </span>
+#### <span style="color:deepskyblue"> --- Chapter 3.1 - Using R: The Basics--- </span>
+
+Please send me the code to solutions to Laboratory assignments 1-6 in either a .R file or any text document such as .pdf, .txt, .doc, etc.
+
+## <span style="color:deepskyblue"> --- Section 3.1.1 - Objects --- </span>
+
+Let's look at Numerics
+```{r}
+# Assign the value 10 into an object called Number using the assignment operator <- 
+Number <- 10
+
+# We can similarly do this with =, however it is standard to use <- when assigning an object
+# in other cases we will use =, thus using <- in assigning will make reading code easier later
+Number = 10
+
+# use the print() function to display an object
+print(Number)
+```
+
+## Let's look at Characters
+
+```{r}
+# Character
+Words <- "Hello World"
+
+# cat is an altenative to print
+cat(Words)
+
+# use class() to check the class of an object
+class(Words)
+```
+
+## Let's look at Vectors 
+
+```{r}
+# use c() to combine elements into a vector structure
+NumericVect <- c(2.8, 2, 14.8)
+
+# Display the vector by typing just its name
+NumericVect
+
+# We can similarly make a character vector
+CharacterVect <- c("Albania", "Botswana", "Cambodia")
+
+# Display this vector by running the objects name
+CharacterVect
+```
+
+## Let's look at data frames
+
+```{r, eval = FALSE}
+# combine the two vectors together into a dataframe using the function data.frame
+StringNumObject <- data.frame(CharacterVect, NumericVect)
+
+# display this dataframe
+StringNumObject
+```
+
+```{r, echo = FALSE}
+StringNumObject <- data.frame(CharacterVect, NumericVect)
+kable(StringNumObject)
+```
+
+---
+
+```{r, eval = FALSE}
+# we can create dataframes in one step as well
+# note the enter line after the , this is done to make readability easier.
+OurDf <- data.frame(first_column = c('a', 'b', 'c'),
+                    second_column = c(1, 2, 3))
+OurDf
+```
+
+```{r, echo = FALSE}
+OurDf <- data.frame(first_column = c('a', 'b', 'c'),
+                    second_column = c(1, 2, 3))
+kable(OurDf)
+```
+
+## <span style="color:orchid"> +++ Laboratory assignment 1-3 +++ </span>
+
+Complete the missing parts in the following 3 questions
+
+```{r, eval = FALSE}
+# 1)
+# Make a character object called HelloWrold with the string 'Hello World this is ---' where --- is your name
+HelloWorld <- " "
+  
+# Display HelloWorld
+HelloWorld
+
+# 2)
+# make a vector of the following 10 numbers, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34
+OurVect <- c( )
+
+# Display this vector
+OurVect
+
+# 3)
+# make a dataframe with two columns:
+# the first column are 3 country names of your choosing, have this column called, 'country'
+# for the second column, do a quick google search to find these countries GDP per capita in 2017 (units in trillions of USD), call this column GDP
+OurFirstDf <- data.frame( )
+
+# Display this dataframe
+OurFirstDf
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.2 - Component Selection --- </span>
+
+```{r}
+# Select the NumericVect object saved in the StringNumObject using the component selector
+NewNumeric <- StringNumObject$NumericVect
+
+# R has quite a few datasets that come pre-installed in it. One of these is the Cars dataset
+# we can import it into our session using the following command
+attach(cars)
+# not we do not see it, but it is there. We can save it into our environment by assigning it
+# notice it has 2 variables, speed and distance (dist)
+cars <- cars
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.3 - Subscripts --- </span>
+
+Square brackets written after a dataframe (with no space) calls the elements of the dataframe
+
+For example $df[1,1]$ calls the first element of the dataframe called $df$
+
+\vspace{20pt}
+
+Note: This will not run if you have a space between the dataframe name and the square brackets. $df \; [1,1]$ is incorrect
+
+---
+
+```{r, eval = FALSE}
+# use head to display the first 6 rows of a dataframe
+head(cars)
+```
+
+```{r, echo = FALSE}
+kable(head(cars))
+```
+
+---
+
+```{r, eval = FALSE}
+# display only selected rows
+cars[3:7, ]
+```
+
+```{r, echo = FALSE}
+kable(cars[3:7, ])
+```
+
+---
+
+```{r, eval = FALSE}
+# or specify multiple columns in specified rows
+cars[4, c("speed", "dist")]
+```
+
+```{r, echo = FALSE}
+# or specify multiple columns in specified rows
+kable(cars[4, c("speed", "dist")])
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.4 - Functions and Commands --- </span>
+
+Use parentheses to call a function. For example $mean(.)$. Where we write a vector in place of the dot such as $mean(vec)$ or $mean(df\$x)$
+
+```{r}
+# use the mean function to find the mean of NumericVect
+mean(x = NumericVect)
+
+# we actually don't need to include the x = ..., just the object name inside the parethesis
+mean(NumericVect)
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.5 - Arguments --- </span>
+
+An argument is a variable called by a function.  Say for example we have the following function,
+
+$$ f(x) = x^2  $$
+
+Then $f(.)$ is the function and $x$ is the argument.  We can have multiple arguments, see for example, 
+
+$$ f(x,y) = x^2 + y $$
+
+Now the function $f(.)$ has two arguments, $x$ and $y$
+
+## <span style="color:deepskyblue"> --- Section 3.1.6 - The workspace \& history --- </span>
+
+We will have a full week covering the workspace and history in the third week (Chapter 4.1 in the textbook). Briefly covered here is the $ls()$ function. We will cover the save, load, read.csv, functions later
+
+```{r}
+# display all objects in your Global Environment
+ls()
+
+# note the broom icon in the environment window will remove all objects
+# note your global environment is cleared upon closing or restarting your R session
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.7 - Global R options --- </span>
+
+You can set the digits to display line-by-line using the $round()$
+
+```{r}
+options(digits = 1)
+```
+
+## <span style="color:deepskyblue"> --- Section 3.1.8 - Installing new packages and loading functions --- </span>
+
+We'll learn installing and loading packages later
+
+## <span style="color:orchid"> +++ Laboratory assignment 4-6 +++ </span>
+
+Answer and display the following 3 questions
+
+```{r}
+# 4) Display the second and third rows of OurFirstDf
+
+# 5) Display the mean of GDP per capita in OurFirstDf
+
+# 6) Display the variance of GDP per capita in OurFirstDf
+
+```
+
+That's it for the first Laboratory! Enjoy the rest of your week~

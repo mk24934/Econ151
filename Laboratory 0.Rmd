@@ -1,0 +1,64 @@
+---
+title: "Laboratory for testing"
+author: "Written By Mark McAvoy, in Summer 2020"
+knit: (function(inputFile, encoding) { 
+      out_dir <- 'Knit files (Output)';
+      rmarkdown::render(inputFile,
+                        encoding=encoding, 
+                        output_file=file.path(dirname(inputFile), out_dir, 'Laboratory-0.md')) })
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Clear enviroment before starting 
+remove(list = ls())
+
+
+# The following sets your working directory to wherever this .Rmd file is saved
+# note, must be included in the setup portion of the .Rmd
+knitr::opts_knit$set(root.dir = getwd())
+library(kableExtra)
+options(knitr.table.format = "html")
+# Note: this only runs when knit, so if try running by hand it will not do anything, best to also change working directory manually
+# alternatively, you may change working directory manually
+
+
+# if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org") # run this the first time (only need to once), note moved tidyverse to after AER package, as it was creating some issues running AER after tidyverse
+#   library(tidyverse) # includes ggplot2 and many more useful libraries
+# if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.org")
+#   library(knitr) # knitr is used to render this R code to a LaTeX file (includes kable)
+# if(!require(stargazer)) install.packages("stargazer", repos = "http://cran.us.r-project.org")
+#   library(stargazer) # knitr is used to render this R code to a LaTeX file (includes kable)
+```
+
+# <span style="color:orchid"> +++ Laboratory assignment A +++ </span>
+
+#### <span style="color:charcoal"> 1. Make a Data Frame with 2 columns and 3 rows (input any values you would like) </span>
+
+```{r}
+df <- data.frame(x = c(1,2,3),
+                 y = c(4,4,5))
+```
+
+#### <span style="color:charcoal"> 2. Find the mean of the first column, save the result in a variable called this_mean </span>
+
+```{r}
+this_mean <- (1+2+3)/3
+```
+
+#### <span style="color:charcoal"> 3. Test if this mean is correct. Place your answer below inside the test1 function below the r code chunk </span>
+
+```{r}
+test1 <- function(value) {
+  if (value == mean(df[,1]))
+    text_spec('This test was passed!', color = "green")
+  else
+    text_spec('Test is not passed, please try again', color = "blue")
+}
+```
+
+### Test 1: `r test1(this_mean) `
+

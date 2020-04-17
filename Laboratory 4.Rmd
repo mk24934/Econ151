@@ -1,0 +1,272 @@
+---
+title: "Laboratory 4"
+author: "Written by Mark McAvoy"
+date: "Summer 2020"
+knit: (function(inputFile, encoding) { 
+      out_dir <- 'Knit files (Output)';
+      rmarkdown::render(inputFile,
+                    encoding=encoding, 
+                    output_file=file.path(dirname(inputFile), out_dir, 'Laboratory 4.html')) })
+output:
+  revealjs::revealjs_presentation:
+    theme: beige
+    highlight: pygments
+    center: true
+    css: styles.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Clear enviroment before starting 
+remove(list = ls())
+
+
+# The following sets your working directory to wherever this .Rmd file is saved
+# note, must be included in the setup portion of the .Rmd
+knitr::opts_knit$set(root.dir = getwd())
+library(kableExtra)
+options(knitr.table.format = "html")
+# Note: this only runs when knit, so if try running by hand it will not do anything, best to also change working directory manually
+# alternatively, you may change working directory manually
+
+# if(!require(revealjs)) install.packages("revealjs", repos = "http://cran.us.r-project.org") # for revealjs slides
+# library(revealjs) 
+if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org") # run this the first time (only need to once), note moved tidyverse to after AER package, as it was creating some issues running AER after tidyverse
+  library(tidyverse) # includes ggplot2 and many more useful libraries
+# if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.org")
+#   library(knitr) # knitr is used to render this R code to a LaTeX file (includes kable)
+# if(!require(stargazer)) install.packages("stargazer", repos = "http://cran.us.r-project.org")
+#   library(stargazer) # knitr is used to render this R code to a LaTeX file (includes kable)
+if(!require(WDI)) install.packages("WDI", repos = "http://cran.us.r-project.org") # WDI allows reading of datasets from the World Developing Indicators from the World Bank: https://www.worldbank.org
+library(WDI)
+```
+
+### <span style="color:forestgreen"> --- Principles of Economics --- </span>
+
+#### <span style="color:forestgreen"> --- Chapter 25 - Economic Growth --- </span>
+
+text
+
+---
+
+### <span style="color:deepskyblue"> --- Reproducible Research with R  --- </span>
+
+Starting from this Laboratory we will be using packages. To begin with we will use the Tidyverse package. This includes many useful functions that will make our lives easier later.
+
+#### <span style="color:deepskyblue"> --- Section 7.1.1 - Get a handle on your data  --- </span>
+
+```{r}
+# Read in: FertConsumpData 
+FertConsumpData <- WDI(indicator = "AG.CON.FERT.ZS") #AG.CON.FERT.ZS is the World Bank designation for Fertile Consumption Data
+
+# note the length of our dimension is longer (at 15840 for row length) since more years have passed since the bookw as written (in 2011 the row length was 1743)
+dim(FertConsumpData)
+
+# Click on the FertConsumpData variable in the Environment to inspect it (It will open as a tab in the top left window)
+# delete all of this later
+# library(reshape2)
+# melt.Fert <- melt(FertConsumpData, measure.vars = "AG.CON.FERT.ZS",
+#                   variable.names = "columns",
+#                   value.name = "fert")
+# wide.OtherFert <- dcast(melt.Fert, year ~ fert, value.var = "fert")
+# 
+# 
+# library(tidyverse)
+# SpreadFert <- read.csv("Input/Lab3_data.csv", check.names = FALSE)
+# SpreadFert_sub <- rename(SpreadFert_sub, Country = 'Country Name')
+# write.csv(SpreadFert, 'Input/Lab3_data.csv', row.names = FALSE)
+SpreadFert <- read.csv("Input/Lab4-data.csv", check.names = FALSE, stringsAsFactors = FALSE)
+# SpreadFert_sub <- SpreadFert %>% subset(Country_Code %in% c("ARG", "CHN", "KOR" , "USA"))
+# SpreadFert_sub <- SpreadFert_sub[,c(1,2,15:17)]
+# SpreadFert <- SpreadFert %>% rename(Country_Code = "Country Code")
+# write.csv(SpreadFert_sub, 'Input/Lab3_data.csv', row.names = FALSE)
+# SpreadFert_sub = SpreadFert[1:6,c(1,2,15:17)]
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.2 Reshaping data --- </span>
+
+
+```{r}
+GatheredFert <- gather(SpreadFert, Year, Fert, 3:5)
+
+# Show GatheredFert
+head(GatheredFert)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.3 Renaming variables --- </span>
+
+```{r}
+GatheredFert <- rename(GatheredFert, 
+                       year = Year,
+                       FertilizerConsumption = Fert)
+
+# Show GatheredFert
+head(GatheredFert)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.4 Ordering data --- </span>
+
+```{r}
+# Order GatheredFert by country-year
+GatheredFert <- GatheredFert[order(GatheredFert$Country, GatheredFert$year), ]
+
+# Show GatheredFert
+head(GatheredFert)
+```
+
+---
+
+An easier method is to use $arrange$ (in the Tidyverse package)
+
+```{r}
+GatheredFert <- arrange(GatheredFert, Country, year)
+
+# Show GatheredFert
+head(GatheredFert)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.5 Subsetting data --- </span>
+
+```{r}
+# Create outlier data frame
+FertOutliers <- subset(x = GatheredFert, FertilizerConsumption > 500)
+
+# Show FertOutliers
+head(FertOutliers)
+```
+
+---
+
+```{r}
+GatheredFertSub <- subset(x = GatheredFert, FertilizerConsumption <= 1000)
+
+# Show GatheredFertSub
+head(GatheredFertSub)
+```
+
+---
+
+```{r}
+# Drop Argentina type from GatheredFertSub
+GatheredFertSub <- subset(x = GatheredFertSub, Country != "Argentina")
+
+# Show GatheredFertSub
+head(GatheredFertSub)
+```
+
+---
+
+```{r}
+# Remove observations of FertilizerConsumption # with missing values
+# There are no missing values in the data provided, but if there were any, they would be removed
+GatheredFertSub <- subset(x = GatheredFert, !is.na(FertilizerConsumption))
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.6 Recoding string/numeric variables --- </span>
+
+```{r}
+# Recode country == "Korea, Rep."" to "South Korea"
+GatheredFertSub$Country[GatheredFertSub$Country == "Korea, Rep."] <- "South Korea"
+# As an aside note: if we neglect to include the "stringsAsFactors = FALSE" option when we read the data in, the following line will return an error
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.7 Creating new variables from old --- </span>
+
+```{r}
+GatheredFertSub$logFertConsumption <- log( GatheredFertSub$FertilizerConsumption)
+
+# Summarize the log transformed variable
+summary(GatheredFertSub$logFertConsumption)
+```
+
+#### <span style="color:deepskyblue"> --- Creating new variables from old - Using Tidyverse --- </span>
+
+```{r}
+GatheredFertSub <- GatheredFertSub %>% mutate(logFertConsumption2 = log(FertilizerConsumption))
+
+# Summarize the log transformed variable
+summary(GatheredFertSub$logFertConsumption2)
+```
+---
+
+
+#### <span style="color:deepskyblue"> --- Creating factor variables --- </span>
+
+Let's go straight to the Tidyverse way this time, as the base R method is too unseemly 
+
+```{r}
+# Create a factor variable with the cut command
+FertFactor <- cut(GatheredFertSub$FertilizerConsumption,
+                  breaks = c(-0.01, 17.99, 80.99, 157.99, 999.99),
+                  labels = c("low", "medium low", "medium high", "high"))
+
+# Summarize FertFactor
+summary(FertFactor)
+```
+
+---
+
+Or we can add as a variable to our dataframe using mutate
+
+```{r}
+GatheredFertSub <- GatheredFertSub %>% mutate(FertFactor = 
+                                                  cut(FertilizerConsumption,
+                                                  breaks = c(-0.01, 17.99, 80.99, 157.99, 999.99),
+                                                  labels = c("low", "medium low", "medium high", "high")))
+head(GatheredFertSub)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.1.8 Changing variable types--- </span>
+
+```{r}
+# Let's make a new dataframe
+df <- data.frame(x = c("1", "2", "3"),
+                 y = c(4, 5, 6))
+
+# Check the class of x - x is a factor since we surrounded the numbers with ""
+class(df$x)
+
+# Check the class of y - these are numerics as we expect
+class(df$y)
+```
+
+---
+
+```{r}
+# We can change x to numeric using as.numeric
+df$x <- as.numeric(df$x)
+
+class(df$x)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.2.1 Merging: Binding --- </span>
+
+Let's add to our dataframe df another two rows
+
+With $rbind$ the columns must be the same, as we are adding to the rows of the first dataframe the values from the second
+
+```{r}
+df2 <- data.frame(x = c(10, 11),
+                  y = c(20, 21))
+
+df.appended <- rbind(df, df2)
+
+head(df.appended)
+```
+
+---
+
+With $cbind$ the rows must be the same, as we are adding to the columns of the first dataframe the values from the second
+
+```{r}
+df3 <- data.frame(z = c(30, 33, 35))
+
+df.appended2 <- cbind(df, df3)
+```
+
+#### <span style="color:deepskyblue"> --- Section 7.2.2 The merge command --- </span>
+
+```{r}
+# Lets 
+```
